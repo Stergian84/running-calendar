@@ -42,11 +42,24 @@ def fetch_clean_page_text(url: str) -> str:
     headers = {
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-        )
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+        ),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "el-GR,el;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
     }
-    response = requests.get(url, headers=headers, timeout=25)
-    response.raise_for_status()
+
+    response = None
+    for attempt in range(2):
+        try:
+            response = requests.get(url, headers=headers, timeout=25)
+            response.raise_for_status()
+            break
+        except requests.RequestException:
+            if attempt == 1:
+                raise
+            time.sleep(2)
 
     soup = BeautifulSoup(response.text, "html.parser")
 
