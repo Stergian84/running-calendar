@@ -12,9 +12,9 @@ from pydantic import BaseModel, Field
 
 # Λίστα πηγών (URLs) προς σάρωση — μπορείς να προσθέσεις ή να αφαιρέσεις όποιο link θέλεις
 TARGET_SOURCES = [
-    "https://www.runningnews.gr/category.php?cat=9",     # RunningNews - Δρόμος
-    "https://www.runningnews.gr/category.php?subcat=44", # RunningNews - Βουνό
-    "https://runntrail.gr/agones/",                      # Runntrail - Αγώνες
+    "https://www.runningnews.gr/category.php?cat=9",              # RunningNews - Δρόμος
+    "https://www.runningnews.gr/category.php?subcat=44",          # RunningNews - Βουνό
+    "https://www.advendure.com/index.php/agonistikos-odigos",     # Advendure - Trail & Περιπέτεια
 ]
 
 
@@ -103,17 +103,32 @@ def extract_races_with_gemini(client: genai.Client, source_url: str, page_text: 
 {page_text}
 """
 
-    response = client.models.generate_content(
-        model="gemini-3.8-flash",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=ExtractedRaces,
-            temperature=0.1,
-        ),
-    )
+    max_attempts = 4
+    response = None
 
-    if not response.parsed:
+    for attempt in range(max_attempts):
+        try:
+            response = client.models.generate_content(
+                model="gemini-3.8-flash",
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=ExtractedRaces,
+                    temperature=0.1,
+                ),
+            )
+            break
+        except Exception as exc:
+            error_text = str(exc)
+            is_temporary = any(code in error_text for code in ("503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED"))
+            if is_temporary and attempt < max_attempts - 1:
+                wait_seconds = 12 * (attempt + 1)
+                print(f"Προσωρινός φόρτος στο Gemini (προσπάθεια {attempt + 1}/{max_attempts}). Επανάληψη σε {wait_seconds}s...")
+                time.sleep(wait_seconds)
+            else:
+                raise
+
+    if not response or not response.parsed:
         return []
 
     return [race.model_dump() for race in response.parsed.races]
