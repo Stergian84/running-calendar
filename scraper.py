@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 TARGET_SOURCES = [
     "https://www.runningnews.gr/category.php?cat=9",              # RunningNews - Δρόμος
     "https://www.runningnews.gr/category.php?subcat=44",          # RunningNews - Βουνό
-    "https://www.advendure.com/index.php/agonistikos-odigos",     # Advendure - Trail & Περιπέτεια
+    "https://www.advendure.com/index.php/calendar",     # Advendure - Trail & Περιπέτεια
 ]
 
 
