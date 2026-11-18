@@ -103,7 +103,7 @@ def extract_races_with_gemini(client: genai.Client, source_url: str, page_text: 
 {page_text}
 """
 
-    max_attempts = 4
+max_attempts = 2
     response = None
 
     for attempt in range(max_attempts):
@@ -122,9 +122,8 @@ def extract_races_with_gemini(client: genai.Client, source_url: str, page_text: 
             error_text = str(exc)
             is_temporary = any(code in error_text for code in ("503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED"))
             if is_temporary and attempt < max_attempts - 1:
-                wait_seconds = 12 * (attempt + 1)
-                print(f"Προσωρινός φόρτος στο Gemini (προσπάθεια {attempt + 1}/{max_attempts}). Επανάληψη σε {wait_seconds}s...")
-                time.sleep(wait_seconds)
+                print("Προσωρινός φόρτος στο Gemini. Επανάληψη σε 5s...")
+                time.sleep(5)
             else:
                 raise
 
@@ -161,22 +160,25 @@ def main() -> None:
     client = genai.Client(api_key=gemini_api_key)
     all_extracted = []
 
+   total_sent = 0
+
     for url in TARGET_SOURCES:
         try:
             print(f"Σάρωση πηγής: {url}")
             text = fetch_clean_page_text(url)
             races = extract_races_with_gemini(client, url, text)
             print(f"Βρέθηκαν {len(races)} αγώνες από {url}")
-            all_extracted.extend(races)
-            time.sleep(3)  # Μικρή παύση μεταξύ πηγών
+
+            if races:
+                print(f"Αποστολή {len(races)} αγώνων στο Google Sheet...")
+                send_to_google_sheets(races, google_api_url, ingest_api_secret)
+                total_sent += len(races)
+
+            time.sleep(2)
         except Exception as exc:
             print(f"Σφάλμα στη σελίδα {url}: {exc}")
 
-    if all_extracted:
-        print(f"Αποστολή συνολικά {len(all_extracted)} εγγραφών για έλεγχο και καταχώρηση...")
-        send_to_google_sheets(all_extracted, google_api_url, ingest_api_secret)
-    else:
-        print("Δεν βρέθηκαν αγώνες προς αποστολή.")
+    print(f"Ολοκλήρωση. Συνολικοί αγώνες που στάλθηκαν για έλεγχο: {total_sent}")
 
 
 if __name__ == "__main__":
