@@ -109,7 +109,7 @@ def extract_races_with_gemini(client: genai.Client, source_url: str, page_text: 
     for attempt in range(max_attempts):
         try:
             response = client.models.generate_content(
-                model="gemini-3.8-flash",
+                model="gemini-4-hydrogen",
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
