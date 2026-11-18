@@ -103,7 +103,7 @@ def extract_races_with_gemini(client: genai.Client, source_url: str, page_text: 
 {page_text}
 """
 
-models_to_try = ["gemini-4-hydrogen", "gemini-4-hydrogen", "gemini-3.8-flash"]
+    models_to_try = ["gemini-4-hydrogen", "gemini-4-hydrogen", "gemini-3.8-flash"]
     response = None
 
     for attempt, model_name in enumerate(models_to_try):
