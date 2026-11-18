@@ -103,13 +103,13 @@ def extract_races_with_gemini(client: genai.Client, source_url: str, page_text: 
 {page_text}
 """
 
-    max_attempts = 2
+models_to_try = ["gemini-4-hydrogen", "gemini-4-hydrogen", "gemini-3.8-flash"]
     response = None
 
-    for attempt in range(max_attempts):
+    for attempt, model_name in enumerate(models_to_try):
         try:
             response = client.models.generate_content(
-                model="gemini-4-hydrogen",
+                model=model_name,
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
@@ -121,9 +121,11 @@ def extract_races_with_gemini(client: genai.Client, source_url: str, page_text: 
         except Exception as exc:
             error_text = str(exc)
             is_temporary = any(code in error_text for code in ("503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED"))
-            if is_temporary and attempt < max_attempts - 1:
-                print("Προσωρινός φόρτος στο Gemini. Επανάληψη σε 5s...")
-                time.sleep(5)
+            if is_temporary and attempt < len(models_to_try) - 1:
+                wait_seconds = 10 * (attempt + 1)
+                next_model = models_to_try[attempt + 1]
+                print(f"Προσωρινός φόρτος στο {model_name}. Επανάληψη σε {wait_seconds}s με {next_model}...")
+                time.sleep(wait_seconds)
             else:
                 raise
 
