@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Καλεντάρι Αγώνων Δρόμου & Βουνού</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Tailwind slate-50 */
+        }
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Hero Section -->
+    <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white py-16 px-4 shadow-lg relative overflow-hidden">
+        <!-- Abstract background pattern -->
+        <div class="absolute inset-0 opacity-10">
+            <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M0 40L40 0H20L0 20M40 40V20L20 40" fill="currentColor" opacity="0.5"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#pattern)" />
+            </svg>
+        </div>
+        
+        <div class="max-w-6xl mx-auto text-center relative z-10">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Καλεντάρι Αγώνων Δρόμου & Βουνού</h1>
+            <p class="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto font-light">
+                Ανακαλύψτε, φιλτράρετε και προγραμματίστε τον επόμενο αγώνα σας σε όλη την Ελλάδα.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full -mt-8 relative z-20">
+        
+        <!-- Filters Section (Glassmorphism style) -->
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-6 mb-10 border border-slate-100">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                
+                <!-- Search -->
+                <div class="relative">
+                    <label for="searchInput" class="block text-sm font-medium text-slate-500 mb-1">Αναζήτηση</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input type="text" id="searchInput" placeholder="Τίτλος ή Περιοχή..." 
+                            class="pl-10 w-full rounded-xl border-slate-200 border bg-slate-50 py-2.5 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                    </div>
+                </div>
+
+                <!-- Terrain Filter -->
+                <div>
+                    <label for="terrainFilter" class="block text-sm font-medium text-slate-500 mb-1">Τερέν</label>
+                    <select id="terrainFilter" class="w-full rounded-xl border-slate-200 border bg-slate-50 py-2.5 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none cursor-pointer">
+                        <option value="all">Όλα τα τερέν</option>
+                        <option value="Δρόμος">Δρόμος</option>
+                        <option value="Βουνό">Βουνό</option>
+                        <option value="Μικτό">Μικτό</option>
+                        <option value="Στίβος">Στίβος</option>
+                    </select>
+                </div>
+
+                <!-- Distance Filter (Simplified matching) -->
+                <div>
+                    <label for="distanceFilter" class="block text-sm font-medium text-slate-500 mb-1">Απόσταση (Περιέχει)</label>
+                    <select id="distanceFilter" class="w-full rounded-xl border-slate-200 border bg-slate-50 py-2.5 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none cursor-pointer">
+                        <option value="all">Όλες οι αποστάσεις</option>
+                        <option value="5km">5km / 5χλμ</option>
+                        <option value="10km">10km / 10χλμ</option>
+                        <option value="21">Ημιμαραθώνιος (21km)</option>
+                        <option value="42">Μαραθώνιος (42km)</option>
+                        <option value="ultra">Υπεραπόσταση (Ultra)</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="flex justify-center items-center py-20">
+            <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-slate-500 font-medium">Φόρτωση αγώνων...</span>
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-center">
+            <div class="bg-slate-100 p-6 rounded-full mb-4">
+                <svg class="h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-slate-900">Δεν βρέθηκαν αγώνες</h3>
+            <p class="mt-1 text-slate-500">Δοκιμάστε να αλλάξετε τα φίλτρα αναζήτησης.</p>
+            <button id="resetFiltersBtn" class="mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">Επαναφορά Φίλτρων</button>
+        </div>
+
+        <!-- Races Grid -->
+        <div id="racesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+            <!-- Cards will be injected here via JavaScript -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm text-slate-500">
+            <p>Δημιουργήθηκε για την κοινότητα των δρομέων. Τα δεδομένα ενημερώνονται τακτικά.</p>
+        </div>
+    </footer>
+
+    <script>
+        /**
+         * ΣΗΜΑΝΤΙΚΟ: ΣΥΝΔΕΣΗ ΜΕ ΤΟ GOOGLE SHEET ΣΟΥ
+         * =======================================================
+         * Αντικατέστησε το παρακάτω URL με το URL που σου έδωσε 
+         * το Apps Script στο Deploy της Φάσης 2 
+         * (π.χ. 'https://script.google.com/macros/s/AKfyc.../exec')
+         */
+        const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycbyUMvZW-K_QkJnGAIsLtrbZrXeb-wdA-Twt7ybnHkEAat3KyQREYLMO1SN0uTY8y00F/exec'; 
+
+        // Mock data fallback if API is not set or fails
+        const MOCK_DATA = [
+            {
+                "id": "1",
+                "title": "Αυθεντικός Μαραθώνιος Αθήνας",
+                "date": "08/11/2026",
+                "location": "Αθήνα",
+                "terrain": "Δρόμος",
+                "distances": "5km, 10km, 42.195km",
+                "link": "https://www.athensauthenticmarathon.gr/"
+            },
+            {
+                "id": "2",
+                "title": "Ziria Skyrace",
+                "date": "24/05/2027",
+                "location": "Ζήρεια, Κορινθία",
+                "terrain": "Βουνό",
+                "distances": "10km, 30km",
+                "link": "https://example.com/ziria"
+            },
+            {
+                "id": "3",
+                "title": "Ημιμαραθώνιος Κρήτης",
+                "date": "04/10/2026",
+                "location": "Αρκαλοχώρι, Κρήτη",
+                "terrain": "Δρόμος",
+                "distances": "5km, 10km, 21.1km",
+                "link": "https://example.com/crete"
+            },
+            {
+                "id": "4",
+                "title": "Olympus Marathon",
+                "date": "27/06/2027",
+                "location": "Λιτόχωρο, Πιερία",
+                "terrain": "Βουνό",
+                "distances": "14km, 44km (Ultra)",
+                "link": "https://example.com/olympus"
+            },
+            {
+                "id": "5",
+                "title": "Lycabettus Run",
+                "date": "21/02/2027",
+                "location": "Λυκαβηττός, Αθήνα",
+                "terrain": "Μικτό",
+                "distances": "4.5km, 9km",
+                "link": "https://example.com/lycabettus"
+            }
+        ];
+
+        // State variables
+        let allRaces = [];
+        let filteredRaces = [];
+
+        // DOM Elements
+        const grid = document.getElementById('racesGrid');
+        const loader = document.getElementById('loader');
+        const emptyState = document.getElementById('emptyState');
+        const searchInput = document.getElementById('searchInput');
+        const terrainFilter = document.getElementById('terrainFilter');
+        const distanceFilter = document.getElementById('distanceFilter');
+        const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+
+        // Fetch Data on Load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchRaces();
+            setupEventListeners();
+        });
+
+        async function fetchRaces() {
+            showLoader();
+            
+            try {
+                // Αν δεν έχεις βάλει το URL σου ακόμα, χρησιμοποιούμε τα Mock Δεδομένα (για preview)
+                if(GOOGLE_API_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || GOOGLE_API_URL === '') {
+                    console.log("Using mock data for preview.");
+                    allRaces = MOCK_DATA;
+                } else {
+                    const response = await fetch(GOOGLE_API_URL);
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    const data = await response.json();
+                    
+                    // Αν υπάρχει error property από το Apps script μας
+                    if(data.error) throw new Error(data.error); 
+                    
+                    allRaces = data;
+                }
+            } catch (error) {
+                console.error('Σφάλμα κατά την άντληση των αγώνων:', error);
+                // Fallback στα mock data σε περίπτωση που κολλήσει το CORS ή το API
+                allRaces = MOCK_DATA; 
+            }
+
+            // Default: δείξε όλους τους αγώνες
+            filteredRaces = [...allRaces];
+            renderRaces();
+        }
+
+        function renderRaces() {
+            hideLoader();
+            grid.innerHTML = ''; // Καθαρισμός grid
+
+            if (filteredRaces.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+            grid.classList.remove('hidden');
+
+            filteredRaces.forEach(race => {
+                // Καθορισμός χρωμάτων ανάλογα με το τερέν
+                let terrainColorClass = 'bg-slate-100 text-slate-700'; // Default
+                const terrainLower = (race.terrain || '').toLowerCase();
+                
+                if (terrainLower.includes('βουνό') || terrainLower.includes('mountain')) {
+                    terrainColorClass = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+                } else if (terrainLower.includes('δρόμος') || terrainLower.includes('road')) {
+                    terrainColorClass = 'bg-blue-100 text-blue-800 border-blue-200';
+                } else if (terrainLower.includes('μικτό') || terrainLower.includes('mixed')) {
+                    terrainColorClass = 'bg-purple-100 text-purple-800 border-purple-200';
+                } else if (terrainLower.includes('στίβος') || terrainLower.includes('track')) {
+                    terrainColorClass = 'bg-orange-100 text-orange-800 border-orange-200';
+                }
+
+                // Δημιουργία της κάρτας HTML
+                const cardHTML = `
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full fade-in relative overflow-hidden group">
+                        
+                        <!-- Top decorative accent line -->
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+
+                        <!-- Terrain Badge -->
+                        <div class="mb-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${terrainColorClass}">
+                                ${escapeHTML(race.terrain || 'Άγνωστο')}
+                            </span>
+                        </div>
+
+                        <!-- Title -->
+                        <h2 class="text-xl font-bold text-slate-900 mb-4 leading-tight">${escapeHTML(race.title)}</h2>
+
+                        <div class="space-y-3 mb-6 flex-grow text-sm text-slate-600">
+                            
+                            <!-- Date -->
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-blue-500 mr-3 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span>${escapeHTML(race.date)}</span>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>${escapeHTML(race.location)}</span>
+                            </div>
+
+                            <!-- Distances -->
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-indigo-500 mr-3 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                <span>${escapeHTML(race.distances)}</span>
+                            </div>
+                        </div>
+
+                        <!-- Button -->
+                        <div class="pt-4 border-t border-slate-100 mt-auto">
+                            <a href="${escapeHTML(race.link || '#')}" target="_blank" rel="noopener noreferrer" 
+                               class="block w-full text-center bg-slate-50 hover:bg-blue-600 text-blue-700 hover:text-white font-medium py-2.5 px-4 rounded-xl transition-colors duration-200">
+                                Πληροφορίες Αγώνα
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                // Προσθήκη της κάρτας στο grid
+                grid.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+
+        // Logic για τα φίλτρα
+        function applyFilters() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const terrainValue = terrainFilter.value;
+            const distanceValue = distanceFilter.value;
+
+            filteredRaces = allRaces.filter(race => {
+                // 1. Text Search (Title or Location)
+                const textMatch = 
+                    (race.title && race.title.toLowerCase().includes(searchTerm)) || 
+                    (race.location && race.location.toLowerCase().includes(searchTerm));
+
+                // 2. Terrain Match
+                const terrainMatch = 
+                    (terrainValue === 'all') || 
+                    (race.terrain && race.terrain.toLowerCase() === terrainValue.toLowerCase());
+
+                // 3. Distance Match
+                let distanceMatch = true;
+                if (distanceValue !== 'all') {
+                    const distString = (race.distances || '').toLowerCase();
+                    if (distanceValue === '5km') {
+                        distanceMatch = distString.includes('5') && !distString.includes('15') && !distString.includes('25'); // Basic heuristic
+                    } else if (distanceValue === '10km') {
+                        distanceMatch = distString.includes('10');
+                    } else if (distanceValue === '21') {
+                        distanceMatch = distString.includes('21') || distString.includes('ημι');
+                    } else if (distanceValue === '42') {
+                        distanceMatch = distString.includes('42') || distString.includes('μαραθώνιος');
+                    } else if (distanceValue === 'ultra') {
+                        distanceMatch = distString.includes('ultra') || distString.includes('υπερ');
+                    }
+                }
+
+                return textMatch && terrainMatch && distanceMatch;
+            });
+
+            renderRaces();
+        }
+
+        function setupEventListeners() {
+            searchInput.addEventListener('input', applyFilters);
+            terrainFilter.addEventListener('change', applyFilters);
+            distanceFilter.addEventListener('change', applyFilters);
+            
+            resetFiltersBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                terrainFilter.value = 'all';
+                distanceFilter.value = 'all';
+                applyFilters();
+            });
+        }
+
+        // Βοηθητικές συναρτήσεις UI
+        function showLoader() {
+            loader.classList.remove('hidden');
+            grid.classList.add('hidden');
+            emptyState.classList.add('hidden');
+        }
+
+        function hideLoader() {
+            loader.classList.add('hidden');
+        }
+
+        // Βοηθητική συνάρτηση για αποφυγή XSS
+        function escapeHTML(str) {
+            if (!str) return '';
+            const p = document.createElement('p');
+            p.appendChild(document.createTextNode(str));
+            return p.innerHTML;
+        }
+
+    </script>
+</body>
+</html>
