@@ -132,7 +132,6 @@ max_attempts = 2
 
     return [race.model_dump() for race in response.parsed.races]
 
-
 def send_to_google_sheets(races: List[dict], api_url: str, api_secret: str) -> None:
     """Στέλνει τους εξαχθέντες αγώνες στο Google Apps Script Web App."""
     payload = {
