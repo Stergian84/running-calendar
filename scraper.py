@@ -10,7 +10,7 @@ from google import genai
 from google.genai import types
 from pydantic import BaseModel, Field
 
-# Λίστα πηγών (URLs) προς σάρωση — μπορείς να προσθέσεις ή να αφαιρέσεις όποιο link θέλεις
+# Λίστα πηγών (URLs) προς σάρωση
 TARGET_SOURCES = [
     "https://www.runningnews.gr/category.php?cat=9",              # RunningNews - Δρόμος
     "https://www.runningnews.gr/category.php?subcat=44",          # RunningNews - Βουνό
@@ -103,7 +103,7 @@ def extract_races_with_gemini(client: genai.Client, source_url: str, page_text: 
 {page_text}
 """
 
-max_attempts = 2
+    max_attempts = 2
     response = None
 
     for attempt in range(max_attempts):
@@ -132,8 +132,10 @@ max_attempts = 2
 
     return [race.model_dump() for race in response.parsed.races]
 
+
 def send_to_google_sheets(races: List[dict], api_url: str, api_secret: str) -> None:
     """Στέλνει τους εξαχθέντες αγώνες στο Google Apps Script Web App."""
+    # ΑΣΦΑΛΕΙΑ: Ο μυστικός κωδικός διαβάζεται μόνο από μεταβλητές περιβάλλοντος (GitHub Secrets).
     payload = {
         "secret": api_secret,
         "races": races,
@@ -157,9 +159,7 @@ def main() -> None:
         raise RuntimeError("Λείπουν απαραίτητες μεταβλητές περιβάλλοντος (Secrets).")
 
     client = genai.Client(api_key=gemini_api_key)
-    all_extracted = []
-
-   total_sent = 0
+    total_sent = 0
 
     for url in TARGET_SOURCES:
         try:
